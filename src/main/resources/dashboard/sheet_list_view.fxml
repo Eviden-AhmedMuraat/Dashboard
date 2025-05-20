@@ -1,0 +1,12 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="dashboard.controllers.SheetListController">
+    <children>
+        <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
+            <Label fx:id="sheetListTitle" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <ListView fx:id="sheetListView" prefHeight="400" />
+        </VBox>
+    </children>
+</AnchorPane>

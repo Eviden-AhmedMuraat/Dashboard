@@ -1,0 +1,14 @@
+/* Success - green */
+.default-color0.chart-pie {
+    -fx-pie-color: #28a745;
+}
+
+/* Warning - yellow */
+.default-color1.chart-pie {
+    -fx-pie-color: #ffc107;
+}
+
+/* Error - red */
+.default-color2.chart-pie {
+    -fx-pie-color: #dc3545;
+}

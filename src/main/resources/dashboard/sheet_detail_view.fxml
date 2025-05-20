@@ -1,0 +1,20 @@
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="dashboard.controllers.SheetDetailController">
+    <children>
+        <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
+            <Label fx:id="detailTitle" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <TableView fx:id="detailTable">
+                <columns>
+                    <TableColumn fx:id="colProcess" text="Process" />
+                    <TableColumn fx:id="colDetails" text="Process Details" />
+                    <TableColumn fx:id="colInput" text="Input" />
+                    <TableColumn fx:id="colOutput" text="Output" />
+                    <TableColumn fx:id="colStatus" text="Status" />
+                    <TableColumn fx:id="colDecision" text="Decision" />
+                </columns>
+            </TableView>
+        </VBox>
+    </children>
+</AnchorPane>

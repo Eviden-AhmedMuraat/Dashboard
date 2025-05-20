@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx/8"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="dashboard.controllers.ExcelImportController"
+      spacing="10" alignment="CENTER" style="-fx-padding: 20;">
+
+    <Label fx:id="dropLabel"
+           text="Drag and drop your Excel file here"
+           style="-fx-border-color: gray; -fx-border-style: dashed; -fx-padding: 20; -fx-font-size: 14;" />
+
+    <Label fx:id="successLabel"
+           text="✅ Excel file imported successfully!"
+           visible="false"
+           style="-fx-text-fill: green; -fx-font-weight: bold;" />
+
+    <TableView fx:id="tableView" prefHeight="400" prefWidth="800"/>
+</VBox>
