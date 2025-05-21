@@ -1,20 +1,23 @@
 package dashboard.Model;
 
+/**
+ * Represents a detailed transformation record from the detail sheets.
+ */
 public class TransformationRecord {
-    private String transformationId;
-    private String transformationName;
-    private String itemId;
-    private String itemRev;
-    private String process;
-    private String processDetails;
-    private String input;
-    private String output;
-    private String status;    // "Success", "Warning", "Error"
-    private String decision;
+    private final String transformationId;
+    private final String transformationName;
+    private final String itemId;
+    private final String itemRev;
+    private final String process;
+    private final String processDetails;
+    private final String input;
+    private final String output;
+    private final String status;
+    private final String decision;
 
-    public TransformationRecord(String transformationId, String transformationName,
-                                String itemId, String itemRev, String process, String processDetails,
-                                String input, String output, String status, String decision) {
+    public TransformationRecord(String transformationId, String transformationName, String itemId, String itemRev,
+                                String process, String processDetails, String input, String output,
+                                String status, String decision) {
         this.transformationId = transformationId;
         this.transformationName = transformationName;
         this.itemId = itemId;
@@ -27,7 +30,6 @@ public class TransformationRecord {
         this.decision = decision;
     }
 
-    // Getters
     public String getTransformationId() { return transformationId; }
     public String getTransformationName() { return transformationName; }
     public String getItemId() { return itemId; }
@@ -36,6 +38,6 @@ public class TransformationRecord {
     public String getProcessDetails() { return processDetails; }
     public String getInput() { return input; }
     public String getOutput() { return output; }
-    public String getDecision() { return decision; }
     public String getStatus() { return status; }
+    public String getDecision() { return decision; }
 }

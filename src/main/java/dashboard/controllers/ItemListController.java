@@ -1,7 +1,8 @@
 package dashboard.controllers;
 
+import dashboard.Model.SummaryStatusRow;
 import dashboard.Model.TransformationDataStore;
-import dashboard.Model.TransformationRecord;
+import dashboard.Model.TransformationSummary;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -13,87 +14,62 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ItemListController {
 
     @FXML private Label titleLabel;
-    @FXML private TableView<ItemStatusCount> itemTable;
-    @FXML private TableColumn<ItemStatusCount, String> colItemId;
-    @FXML private TableColumn<ItemStatusCount, String> colItemRev;
-    @FXML private TableColumn<ItemStatusCount, Integer> colStatusCount;
+    @FXML private TableView<SummaryStatusRow> itemTable;
+    @FXML private TableColumn<SummaryStatusRow, String> colTransformationId;
+    @FXML private TableColumn<SummaryStatusRow, String> colTransformationName;
+    @FXML private TableColumn<SummaryStatusRow, Integer> colStatusCount;
 
-    public void loadItemsByStatus(String status) {
-        titleLabel.setText("Items with status: " + status);
+    public void loadItemsByStatus(String statusFilter) {
+        titleLabel.setText("Transformations with status: " + statusFilter);
 
-        Map<String, List<TransformationRecord>> grouped = TransformationDataStore.getRecords().stream()
-                .filter(r -> r.getStatus().equalsIgnoreCase(status))
-                .collect(Collectors.groupingBy(r -> r.getItemId() + "|" + r.getItemRev()));
-
-        List<ItemStatusCount> result = grouped.entrySet().stream()
-                .map(entry -> {
-                    String[] parts = entry.getKey().split("\\|");
-                    String itemId = parts[0];
-                    String itemRev = parts.length > 1 ? parts[1] : "";
-
-                    long uniqueTransformations = entry.getValue().stream()
-                            .map(TransformationRecord::getTransformationId)
-                            .distinct()
-                            .count();
-
-                    return new ItemStatusCount(itemId, itemRev, (int) uniqueTransformations);
+        List<SummaryStatusRow> rows = TransformationDataStore.getSummaries().stream()
+                .filter(s -> switch (statusFilter.toLowerCase()) {
+                    case "success" -> s.getSuccessCount() > 0;
+                    case "warning" -> s.getWarningCount() > 0;
+                    case "error"   -> s.getErrorCount() > 0;
+                    default        -> false;
                 })
-                .sorted(Comparator.comparing(ItemStatusCount::getItemId))
+                .map(s -> new SummaryStatusRow(
+                        s.getTransformationId(),
+                        s.getTransformationName(),
+                        s.getSuccessCount(),
+                        s.getWarningCount(),
+                        s.getErrorCount()
+                ))
                 .collect(Collectors.toList());
 
-        colItemId.setCellValueFactory(new PropertyValueFactory<>("itemId"));
-        colItemRev.setCellValueFactory(new PropertyValueFactory<>("itemRev"));
-        colStatusCount.setCellValueFactory(new PropertyValueFactory<>("statusCount"));
+        colTransformationId.setCellValueFactory(new PropertyValueFactory<>("transformationId"));
+        colTransformationName.setCellValueFactory(new PropertyValueFactory<>("transformationName"));
 
-        ObservableList<ItemStatusCount> data = FXCollections.observableArrayList(result);
+        switch (statusFilter.toLowerCase()) {
+            case "success" -> colStatusCount.setCellValueFactory(new PropertyValueFactory<>("successCount"));
+            case "warning" -> colStatusCount.setCellValueFactory(new PropertyValueFactory<>("warningCount"));
+            case "error"   -> colStatusCount.setCellValueFactory(new PropertyValueFactory<>("errorCount"));
+        }
+
+        ObservableList<SummaryStatusRow> data = FXCollections.observableArrayList(rows);
         itemTable.setItems(data);
 
         itemTable.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2 && itemTable.getSelectionModel().getSelectedItem() != null) {
-                ItemStatusCount selected = itemTable.getSelectionModel().getSelectedItem();
+                SummaryStatusRow selected = itemTable.getSelectionModel().getSelectedItem();
                 try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/dashboard/sheet_list_view.fxml"));
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/dashboard/sheet_detail_view.fxml"));
                     Node view = loader.load();
 
-                    SheetListController controller = loader.getController();
-                    controller.loadSheetsForItem(selected.getItemId(), selected.getItemRev(), status);
+                    SheetDetailController controller = loader.getController();
+                    controller.loadDetails(selected.getTransformationId(), statusFilter);
                     UIController.setContent(view);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         });
-
-        System.out.println("📋 Items gevonden met status '" + status + "': " + result.size());
-    }
-
-    public static class ItemStatusCount {
-        private final String itemId;
-        private final String itemRev;
-        private final int statusCount;
-
-        public ItemStatusCount(String itemId, String itemRev, int statusCount) {
-            this.itemId = itemId;
-            this.itemRev = itemRev;
-            this.statusCount = statusCount;
-        }
-
-        public String getItemId() {
-            return itemId;
-        }
-
-        public String getItemRev() {
-            return itemRev;
-        }
-
-        public int getStatusCount() {
-            return statusCount;
-        }
     }
 }

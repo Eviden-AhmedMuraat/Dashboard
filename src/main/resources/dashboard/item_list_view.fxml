@@ -1,16 +1,15 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="dashboard.controllers.ItemListController">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="dashboard.controllers.ItemListController">
     <children>
         <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
-            <Label fx:id="titleLabel" text="Items met fouten" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Label fx:id="titleLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
             <TableView fx:id="itemTable">
                 <columns>
-                    <TableColumn fx:id="colItemId" text="Item ID" />
-                    <TableColumn fx:id="colItemRev" text="Item Rev" />
-                    <TableColumn fx:id="colStatusCount" text="Total by Status" />
+                    <TableColumn fx:id="colTransformationId" text="Transformation ID" />
+                    <TableColumn fx:id="colTransformationName" text="Transformation Name" />
+                    <TableColumn fx:id="colStatusCount" text="Count" />
                 </columns>
             </TableView>
         </VBox>

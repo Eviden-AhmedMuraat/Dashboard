@@ -42,4 +42,17 @@ public class SheetDetailController {
 
         detailTable.setItems(FXCollections.observableArrayList(filtered));
     }
+
+    public void loadDetails(String transformationId, String status) {
+        detailTitle.setText("Details for " + transformationId + " with status: " + status);
+
+        List<TransformationRecord> filtered = TransformationDataStore.getRecords().stream()
+                .filter(r -> r.getTransformationId().equalsIgnoreCase(transformationId))
+                .filter(r -> r.getStatus().equalsIgnoreCase(status))
+                .collect(Collectors.toList());
+
+        detailTable.setItems(FXCollections.observableArrayList(filtered));
+    }
+
+
 }

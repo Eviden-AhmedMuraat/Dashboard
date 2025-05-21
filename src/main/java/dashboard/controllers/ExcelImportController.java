@@ -1,8 +1,8 @@
 package dashboard.controllers;
 
-import dashboard.Model.TransformationSummary;
-import dashboard.Model.TransformationRecord;
 import dashboard.Model.TransformationDataStore;
+import dashboard.Model.TransformationRecord;
+import dashboard.Model.TransformationSummary;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -72,15 +72,29 @@ public class ExcelImportController {
                 Row row = rows.next();
                 String id = getCellValue(row.getCell(0));
                 String name = getCellValue(row.getCell(1));
-                // Deze waardes worden nu genegeerd — summary wordt nu dynamisch opgebouwd
-                TransformationDataStore.addSummary(new TransformationSummary(id, name));
-            }
 
-            System.out.println("✅ Aantal lege summaries geïmporteerd: " + TransformationDataStore.getSummaries().size());
+                if (id == null || !id.matches("^T\\d{3}$")) continue;
+
+                int success = parseIntSafe(row.getCell(2));
+                int warning = parseIntSafe(row.getCell(3));
+                int error   = parseIntSafe(row.getCell(4));
+
+                TransformationSummary summary = new TransformationSummary(id, name, success, warning, error);
+                TransformationDataStore.addSummary(summary);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Import mislukt", "Fout bij summary-import:\n" + e.getMessage());
+        }
+    }
+
+    private int parseIntSafe(Cell cell) {
+        if (cell == null) return 0;
+        try {
+            return (int) cell.getNumericCellValue();
+        } catch (Exception e) {
+            return 0;
         }
     }
 
@@ -93,15 +107,12 @@ public class ExcelImportController {
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
-
                 if (sheetName.equalsIgnoreCase("summary")) continue;
-
-                System.out.println("➡️ Bezig met import van tabblad: " + sheetName);
 
                 Iterator<Row> rows = sheet.iterator();
                 List<String> headers = new ArrayList<>();
-
                 if (!rows.hasNext()) continue;
+
                 Row headerRow = rows.next();
                 for (Cell cell : headerRow) {
                     headers.add(getCellValue(cell));
@@ -117,7 +128,6 @@ public class ExcelImportController {
 
                     String itemId = rowData.getOrDefault("itemId", "");
                     String itemRev = rowData.getOrDefault("itemRev", "");
-
                     if (itemId.isBlank() && itemRev.isBlank()) continue;
 
                     String process        = rowData.getOrDefault("process", "");
@@ -128,47 +138,36 @@ public class ExcelImportController {
 
                     for (int col = 2; col < headers.size(); col++) {
                         String transformationId = headers.get(col);
+                        if (transformationId == null || !transformationId.matches("^T\\d{3}$")) continue;
+
                         String cellValue = rowData.get(transformationId);
+                        if (cellValue == null || cellValue.equals("0") || cellValue.isBlank()) continue;
 
-                        if (cellValue != null && !cellValue.equals("0") && !cellValue.isBlank()) {
-                            String transformationName = findTransformationName(transformationId);
+                        String transformationName = findTransformationName(transformationId);
+                        String sheetNameLower = sheetName.toLowerCase();
+                        String status = sheetNameLower.contains("error") ? "Error"
+                                : sheetNameLower.contains("warning") ? "Warning"
+                                : "Success";
 
-                            String sheetNameLower = sheetName.toLowerCase();
-                            String status;
-                            if (sheetNameLower.contains("error")) {
-                                status = "Error";
-                            } else if (sheetNameLower.contains("warning")) {
-                                status = "Warning";
-                            } else {
-                                status = "Success";
-                            }
+                        TransformationRecord record = new TransformationRecord(
+                                transformationId,
+                                transformationName,
+                                itemId,
+                                itemRev,
+                                process,
+                                processDetails,
+                                input,
+                                output,
+                                status,
+                                decision
+                        );
 
-                            TransformationRecord record = new TransformationRecord(
-                                    transformationId,
-                                    transformationName,
-                                    itemId,
-                                    itemRev,
-                                    process,
-                                    processDetails,
-                                    input,
-                                    output,
-                                    status,
-                                    decision
-                            );
+                        TransformationDataStore.addRecord(record);
 
-                            TransformationDataStore.addRecord(record);
-
-                            // ✅ Update samenvatting
-                            TransformationSummary summary = TransformationDataStore.getOrCreateSummary(transformationId, transformationName);
-                            summary.increment(status);
-                        }
+                        //  GEEN increment meer op de summary!
                     }
                 }
-
-                System.out.println("✅ Records geïmporteerd uit tabblad: " + sheetName);
             }
-
-            System.out.println("📦 Totale records geladen: " + TransformationDataStore.getRecords().size());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -187,7 +186,7 @@ public class ExcelImportController {
     private String getCellValue(Cell cell) {
         return switch (cell.getCellType()) {
             case STRING -> cell.getStringCellValue();
-            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            case NUMERIC -> String.valueOf((int) cell.getNumericCellValue());
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
             default -> "";
         };
